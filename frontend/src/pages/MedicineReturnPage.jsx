@@ -121,7 +121,7 @@ export default function MedicineReturnPage() {
 
         {/* Message */}
         {message && (
-          <div className="bg-blue-50 border border-blue-200 text-blue-700 px-4 py-2 rounded-lg text-sm">
+          <div className="bg-blue-50 border border-blue-200 text-blue-700 px-4 py-3 rounded-lg text-sm shadow-sm">
             {message}
           </div>
         )}
@@ -142,11 +142,11 @@ export default function MedicineReturnPage() {
                 placeholder="Search by name..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500"
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-shadow"
               />
 
               {searchLoading && (
-                <p className="text-xs text-blue-500 mt-2">Searching...</p>
+                <p className="text-xs text-blue-500 mt-2 font-medium">Searching...</p>
               )}
 
               <div className="mt-3 space-y-2">
@@ -184,17 +184,17 @@ export default function MedicineReturnPage() {
                     <div
                       key={t.transaction_id + t.batch_id}
                       onClick={() => setSelectedTransaction(t)}
-                      className={`p-3 border rounded-lg mb-2 cursor-pointer ${
-                        selectedTransaction?.transaction_id === t.transaction_id
-                          ? "border-blue-500 bg-blue-50"
-                          : "hover:bg-gray-50"
+                      className={`p-3 border rounded-lg mb-2 cursor-pointer transition ${
+                        selectedTransaction?.transaction_id === t.transaction_id && selectedTransaction?.batch_id === t.batch_id
+                          ? "border-blue-500 bg-blue-50 shadow-sm"
+                          : "border-gray-200 hover:border-blue-200 hover:bg-gray-50"
                       }`}
                     >
-                      <p className="font-medium">{t.medicine_name}</p>
-                      <p className="text-xs text-gray-500">
-                        Qty: {t.quantity}
+                      <p className="font-medium text-gray-800">{t.medicine_name}</p>
+                      <p className="text-xs text-gray-500 mt-1">
+                        Qty: {t.quantity} | Remaining: {t.remaining_quantity}
                       </p>
-                      <p className="text-xs text-gray-500">
+                      <p className="text-xs text-gray-400 mt-1">
                         Date:{" "}
                         {new Date(t.transaction_date).toLocaleDateString()}
                       </p>
@@ -219,12 +219,15 @@ export default function MedicineReturnPage() {
             ) : (
               <form onSubmit={handleReturn} className="space-y-4">
 
-                <div className="p-3 bg-gray-50 rounded-lg">
-                  <p className="font-medium">
+                <div className="p-4 bg-gray-50 rounded-lg border border-gray-100">
+                  <p className="font-medium text-gray-800">
                     {selectedTransaction.medicine_name}
                   </p>
-                  <p className="text-xs text-gray-500">
+                  <p className="text-sm text-gray-600 mt-1">
                     Purchased: {selectedTransaction.quantity} units
+                  </p>
+                  <p className="text-sm font-medium text-blue-600 mt-1">
+                    Eligible for Return: {selectedTransaction.remaining_quantity} units
                   </p>
                 </div>
 
@@ -233,7 +236,9 @@ export default function MedicineReturnPage() {
                   value={returnQuantity}
                   onChange={(e) => setReturnQuantity(e.target.value)}
                   placeholder="Enter return quantity"
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                  max={selectedTransaction.remaining_quantity}
+                  min="1"
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-shadow"
                 />
 
                 {/* Policy */}
@@ -245,8 +250,8 @@ export default function MedicineReturnPage() {
                 </div>
 
                 <button
-                  disabled={loading}
-                  className="w-full bg-green-600 hover:bg-green-700 text-white py-2.5 rounded-lg text-sm"
+                  disabled={loading || returnQuantity > selectedTransaction.remaining_quantity}
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2.5 rounded-lg text-sm font-medium transition disabled:bg-gray-400 disabled:cursor-not-allowed"
                 >
                   {loading ? "Processing..." : "Process Return"}
                 </button>

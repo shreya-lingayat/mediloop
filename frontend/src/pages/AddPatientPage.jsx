@@ -1,172 +1,156 @@
-
-
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Layout from "../components/Layout";
 
 export default function AddPatientPage() {
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const isLoggedIn = localStorage.getItem("loggedIn");
-    if (!isLoggedIn) navigate("/");
-  }, [navigate]);
-
   const [patient, setPatient] = useState({
     name: "",
     address: "",
     contact: "",
-    date: new Date().toISOString().split("T")[0], // auto today
+    date: new Date().toISOString().split("T")[0],
   });
-
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState("");
+  const [message, setMessage] = useState({ text: "", type: "" });
 
-  const handleChange = (e) => {
+  const handleChange = (e) =>
     setPatient({ ...patient, [e.target.name]: e.target.value });
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setMessage("");
+    setMessage({ text: "", type: "" });
 
     if (!patient.name || !patient.contact) {
-      setMessage("Name and contact are required.");
+      setMessage({ text: "Full name and contact number are required.", type: "error" });
       return;
     }
 
+    setLoading(true);
     try {
-      setLoading(true);
-
       const res = await fetch("http://localhost:5000/add_patient", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(patient),
       });
-
       const data = await res.json();
+
       if (!res.ok) {
-        setMessage(data.error || "Error adding patient");
+        setMessage({ text: data.error || "Error adding patient.", type: "error" });
         return;
       }
-      setMessage(data.msg || "Patient added successfully");
-
+      setMessage({ text: data.msg || "Patient added successfully.", type: "success" });
       setPatient({
         name: "",
         address: "",
         contact: "",
         date: new Date().toISOString().split("T")[0],
       });
-
     } catch {
-      setMessage("Error adding patient");
+      setMessage({ text: "Server error. Please try again.", type: "error" });
     } finally {
       setLoading(false);
     }
   };
 
+  const alertClass = {
+    success: "bg-emerald-50 border border-emerald-200 text-emerald-700",
+    error: "bg-red-50 border border-red-200 text-red-700",
+    info: "bg-blue-50 border border-blue-200 text-blue-700",
+  };
 
-return (
-  <Layout>
-    <div className="max-w-xl mx-auto py-10">
-
-      {/* Title */}
-      <div className="mb-6">
-        <h1 className="text-2xl font-semibold text-gray-800">
-          Add Patient
-        </h1>
-        <p className="text-sm text-gray-500">
-          Enter patient details below
-        </p>
-      </div>
-
-      {/* Form */}
-      <form
-        onSubmit={handleSubmit}
-        className="bg-white border border-gray-200 rounded-xl shadow-sm p-6 space-y-6"
-      >
-
-        {message && (
-          <div className="text-sm text-blue-600 bg-blue-50 border border-blue-100 px-3 py-2 rounded-lg">
-            {message}
-          </div>
-        )}
-
-        {/* Name */}
-        <div>
-          <label className="block text-sm font-medium text-gray-600 mb-1">
-            Full Name *
-          </label>
-          <input
-            name="name"
-            value={patient.name}
-            onChange={handleChange}
-            placeholder="Enter full name"
-            className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
+  return (
+    <Layout>
+      <div className="max-w-lg">
+        {/* Header */}
+        <div className="mb-6">
+          <h1 className="text-xl font-semibold text-gray-800">Add Patient</h1>
+          <p className="text-sm text-gray-500 mt-0.5">
+            Register a new patient to the system
+          </p>
         </div>
 
-        {/* Contact */}
-        <div>
-          <label className="block text-sm font-medium text-gray-600 mb-1">
-            Contact Number *
-          </label>
-          <input
-            type="tel"
-            name="contact"
-            value={patient.contact}
-            onChange={handleChange}
-            placeholder="Enter phone number"
-            className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
-
-        {/* Address */}
-        <div>
-          <label className="block text-sm font-medium text-gray-600 mb-1">
-            Address
-          </label>
-          <input
-            name="address"
-            value={patient.address}
-            onChange={handleChange}
-            placeholder="Enter address"
-            className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
-
-        {/* Date */}
-        <div>
-          <label className="block text-sm font-medium text-gray-600 mb-1">
-            Registration Date
-          </label>
-          <input
-            type="date"
-            name="date"
-            value={patient.date}
-            onChange={handleChange}
-            className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
-
-        {/* Info */}
-        <div className="text-xs text-gray-400">
-          Patient ID is automatically generated by the system.
-        </div>
-
-        {/* Submit */}
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full bg-green-600 hover:bg-green-700 text-white py-2.5 rounded-lg text-sm font-medium transition"
+        {/* Form */}
+        <form
+          onSubmit={handleSubmit}
+          className="bg-white border border-gray-200 rounded-xl p-6 space-y-5"
         >
-          {loading ? "Adding Patient..." : "Add Patient"}
-        </button>
-      </form>
-    </div>
-  </Layout>
-);
+          {message.text && (
+            <div className={`text-sm px-3.5 py-2.5 rounded-lg ${alertClass[message.type]}`}>
+              {message.text}
+            </div>
+          )}
 
+          {/* Full Name */}
+          <div>
+            <label htmlFor="name" className="label-base">
+              Full Name <span className="text-red-500">*</span>
+            </label>
+            <input
+              id="name"
+              name="name"
+              value={patient.name}
+              onChange={handleChange}
+              placeholder="Enter full name"
+              className="input-base"
+            />
+          </div>
 
+          {/* Contact */}
+          <div>
+            <label htmlFor="contact" className="label-base">
+              Contact Number <span className="text-red-500">*</span>
+            </label>
+            <input
+              id="contact"
+              type="tel"
+              name="contact"
+              value={patient.contact}
+              onChange={handleChange}
+              placeholder="10-digit mobile number"
+              className="input-base"
+            />
+          </div>
+
+          {/* Address */}
+          <div>
+            <label htmlFor="address" className="label-base">
+              Address
+            </label>
+            <input
+              id="address"
+              name="address"
+              value={patient.address}
+              onChange={handleChange}
+              placeholder="Street, city"
+              className="input-base"
+            />
+          </div>
+
+          {/* Registration Date */}
+          <div>
+            <label htmlFor="date" className="label-base">
+              Registration Date
+            </label>
+            <input
+              id="date"
+              type="date"
+              name="date"
+              value={patient.date}
+              onChange={handleChange}
+              className="input-base"
+            />
+          </div>
+
+          <p className="text-xs text-gray-400">
+            Patient ID is automatically generated by the system.
+          </p>
+
+          <button type="submit" disabled={loading} className="btn-primary w-full">
+            {loading ? "Adding Patient…" : "Add Patient"}
+          </button>
+        </form>
+      </div>
+    </Layout>
+  );
 }
-

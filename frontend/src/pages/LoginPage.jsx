@@ -81,7 +81,7 @@ export default function LoginPage() {
         return;
       }
       setToken(data.reset_token || "");
-      setError(`Reset token generated: ${data.reset_token}`);
+      setError("Account verified. Please enter your new password.");
       setMode("reset");
       setPassword("");
     } catch {
@@ -122,7 +122,7 @@ return (
     <div className="w-full max-w-5xl bg-white rounded-2xl shadow-lg overflow-hidden grid grid-cols-1 lg:grid-cols-2">
 
       {/* LEFT SIDE - Branding */}
-      <div className="hidden lg:flex flex-col justify-between p-10 bg-gradient-to-br from-emerald-800 to-emerald-700 text-white">
+      <div className="hidden lg:flex flex-col justify-between p-10 bg-gradient-to-br from-blue-800 to-blue-700 text-white">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
             <Activity className="w-5 h-5" />
@@ -134,13 +134,13 @@ return (
           <h2 className="text-3xl font-bold leading-snug">
             Smart Pharmacy <br /> Management System
           </h2>
-          <p className="mt-3 text-emerald-100 text-sm">
+          <p className="mt-3 text-blue-100 text-sm">
             Manage inventory, billing, expiry tracking and patient credits
             efficiently in one platform.
           </p>
         </div>
 
-        <div className="text-sm text-emerald-100">
+        <div className="text-sm text-blue-100">
           Secure • Reliable • Fast
         </div>
       </div>
@@ -151,7 +151,10 @@ return (
           Sign in to your account
         </h2>
         <p className="text-sm text-gray-500 mb-6">
-          Enter your credentials to continue
+          {mode === "login" && "Enter your credentials to continue"}
+          {mode === "register" && "Create a new account"}
+          {mode === "forgot" && "Enter either your username or email to verify your account"}
+          {mode === "reset" && "Enter your new password"}
         </p>
 
         {error && (
@@ -174,23 +177,24 @@ return (
           className="space-y-4"
         >
 
-          {/* Username */}
-          <div>
-            <label className="text-sm font-medium text-gray-600">
-              Username
-            </label>
-            <div className="relative mt-1">
-              <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-              <input
-                type="text"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                placeholder="Enter username"
-                required
-                className="w-full border border-gray-300 rounded-lg pl-10 pr-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
-              />
+          {mode !== "reset" && (
+            <div>
+              <label className="text-sm font-medium text-gray-600">
+                Username
+              </label>
+              <div className="relative mt-1">
+                <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <input
+                  type="text"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  placeholder={mode === "forgot" ? "Enter username (optional if email provided)" : "Enter username"}
+                  required={mode !== "forgot"}
+                  className="w-full border border-gray-300 rounded-lg pl-10 pr-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
             </div>
-          </div>
+          )}
 
           {(mode === "register" || mode === "forgot") && (
             <div>
@@ -199,61 +203,49 @@ return (
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="Enter email"
-                required
-                className="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
-              />
-            </div>
-          )}
-
-          {mode === "reset" && (
-            <div>
-              <label className="text-sm font-medium text-gray-600">Reset Token</label>
-              <input
-                type="text"
-                value={token}
-                onChange={(e) => setToken(e.target.value)}
-                placeholder="Enter reset token"
-                required
-                className="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                placeholder={mode === "forgot" ? "Enter email (optional if username provided)" : "Enter email"}
+                required={mode === "register"}
+                className="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
           )}
 
           {/* Password */}
-          <div>
-            <label className="text-sm font-medium text-gray-600">
-              Password
-            </label>
-            <div className="relative mt-1">
-              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-              <input
-                type={showPassword ? "text" : "password"}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Enter password"
-                required
-                className="w-full border border-gray-300 rounded-lg pl-10 pr-10 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"
-              >
-                {showPassword ? (
-                  <EyeOff className="w-4 h-4" />
-                ) : (
-                  <Eye className="w-4 h-4" />
-                )}
-              </button>
+          {mode !== "forgot" && (
+            <div>
+              <label className="text-sm font-medium text-gray-600">
+                {mode === "reset" ? "New Password" : "Password"}
+              </label>
+              <div className="relative mt-1">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <input
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder={mode === "reset" ? "Enter new password" : "Enter password"}
+                  required
+                  className="w-full border border-gray-300 rounded-lg pl-10 pr-10 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"
+                >
+                  {showPassword ? (
+                    <EyeOff className="w-4 h-4" />
+                  ) : (
+                    <Eye className="w-4 h-4" />
+                  )}
+                </button>
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Button */}
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 rounded-lg text-sm font-medium transition"
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2.5 rounded-lg text-sm font-medium transition"
           >
             {loading
               ? "Please wait..."
@@ -268,9 +260,9 @@ return (
         </form>
 
         <div className="mt-4 flex gap-3 text-xs">
-          <button onClick={() => setMode("login")} className="text-emerald-700 hover:underline">Sign in</button>
-          <button onClick={() => setMode("register")} className="text-emerald-700 hover:underline">Register</button>
-          <button onClick={() => setMode("forgot")} className="text-emerald-700 hover:underline">Forgot password</button>
+          <button type="button" onClick={() => setMode("login")} className="text-blue-700 hover:underline">Sign in</button>
+          <button type="button" onClick={() => setMode("register")} className="text-blue-700 hover:underline">Register</button>
+          <button type="button" onClick={() => setMode("forgot")} className="text-blue-700 hover:underline">Forgot password</button>
         </div>
 
         <p className="text-xs text-gray-400 mt-6 text-center">

@@ -6,155 +6,154 @@ export default function AddMedicinePage() {
   const [formData, setFormData] = useState({
     medicine_name: "",
     category: "",
-    unit_price: ""
+    unit_price: "",
   });
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState("");
+  const [message, setMessage] = useState({ text: "", type: "" });
   const navigate = useNavigate();
 
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
-  };
+  const handleChange = (e) =>
+    setFormData({ ...formData, [e.target.name]: e.target.value });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setMessage("");
+    setMessage({ text: "", type: "" });
 
     try {
-      const response = await fetch("http://localhost:5000/add_medicine", {
+      const res = await fetch("http://localhost:5000/add_medicine", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
       });
+      const data = await res.json();
 
-      const data = await response.json();
-
-      if (response.ok) {
-        setMessage("Medicine added successfully!");
-        setFormData({
-          medicine_name: "",
-          category: "",
-          unit_price: ""
-        });
-        setTimeout(() => navigate("/dashboard"), 2000);
+      if (res.ok) {
+        setMessage({ text: "Medicine added successfully.", type: "success" });
+        setFormData({ medicine_name: "", category: "", unit_price: "" });
+        setTimeout(() => navigate("/dashboard"), 1800);
+      } else if (res.status === 409) {
+        setMessage({ text: data.error || "Medicine already exists. Redirecting to Add Batch…", type: "info" });
+        setTimeout(() => navigate("/add-batch"), 2000);
       } else {
-        setMessage(data.error || "Failed to add medicine");
+        setMessage({ text: data.error || "Failed to add medicine.", type: "error" });
       }
-    } catch (error) {
-      setMessage("Server error. Please try again.");
-      console.error("Error:", error);
+    } catch {
+      setMessage({ text: "Server error. Please try again.", type: "error" });
     } finally {
       setLoading(false);
     }
   };
 
+  const alertClass = {
+    success: "bg-emerald-50 border border-emerald-200 text-emerald-700",
+    error: "bg-red-50 border border-red-200 text-red-700",
+    info: "bg-blue-50 border border-blue-200 text-blue-700",
+  };
+
   return (
     <Layout>
-      <div className="max-w-2xl mx-auto">
-        <h1 className="text-3xl font-bold mb-6">Add Medicine</h1>
+      <div className="max-w-lg">
 
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
-          {message && (
-            <div className={`mb-4 p-4 rounded-lg ${
-              message.includes("success") 
-                ? "bg-green-100 text-green-700 border border-green-400" 
-                : "bg-red-100 text-red-700 border border-red-400"
-            }`}>
-              {message}
+        {/* Header */}
+        <div className="mb-6">
+          <h1 className="text-xl font-semibold text-gray-800">Add Medicine</h1>
+          <p className="text-sm text-gray-500 mt-0.5">
+            Register a new medicine to the inventory
+          </p>
+        </div>
+
+        {/* Form */}
+        <form
+          onSubmit={handleSubmit}
+          className="bg-white border border-gray-200 rounded-xl p-6 space-y-5"
+        >
+          {/* Feedback */}
+          {message.text && (
+            <div className={`text-sm px-3.5 py-2.5 rounded-lg ${alertClass[message.type]}`}>
+              {message.text}
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
-              <label htmlFor="medicine_name" className="block text-sm font-medium text-gray-700 mb-2">
-                Medicine Name
-              </label>
-              <input
-                type="text"
-                id="medicine_name"
-                name="medicine_name"
-                value={formData.medicine_name}
-                onChange={handleChange}
-                required
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-                placeholder="Enter medicine name"
-              />
-            </div>
+          {/* Medicine Name */}
+          <div>
+            <label htmlFor="medicine_name" className="label-base">
+              Medicine Name <span className="text-red-500">*</span>
+            </label>
+            <input
+              id="medicine_name"
+              name="medicine_name"
+              value={formData.medicine_name}
+              onChange={handleChange}
+              required
+              placeholder="e.g. Paracetamol 500mg"
+              className="input-base"
+            />
+          </div>
 
-            <div>
-              <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-2">
-                Category
-              </label>
-              <select
-                id="category"
-                name="category"
-                value={formData.category}
-                onChange={handleChange}
-                required
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-              >
-                <option value="">Select category</option>
-                <option value="Tablet">Tablet</option>
-                <option value="Capsule">Capsule</option>
-                <option value="Syrup">Syrup</option>
-                <option value="Injection">Injection</option>
-                <option value="Ointment">Ointment</option>
-                <option value="Drops">Drops</option>
-                <option value="Other">Other</option>
-              </select>
-            </div>
+          {/* Category */}
+          <div>
+            <label htmlFor="category" className="label-base">
+              Category <span className="text-red-500">*</span>
+            </label>
+            <select
+              id="category"
+              name="category"
+              value={formData.category}
+              onChange={handleChange}
+              required
+              className="input-base"
+            >
+              <option value="">Select category</option>
+              <option value="Tablet">Tablet</option>
+              <option value="Capsule">Capsule</option>
+              <option value="Syrup">Syrup</option>
+              <option value="Injection">Injection</option>
+              <option value="Ointment">Ointment</option>
+              <option value="Drops">Drops</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
 
-            <div>
-              <label htmlFor="unit_price" className="block text-sm font-medium text-gray-700 mb-2">
-                Unit Price (INR)
-              </label>
-              <input
-                type="number"
-                id="unit_price"
-                name="unit_price"
-                value={formData.unit_price}
-                onChange={handleChange}
-                required
-                min="0"
-                step="0.01"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-                placeholder="Enter unit price"
-              />
-            </div>
+          {/* Unit Price */}
+          <div>
+            <label htmlFor="unit_price" className="label-base">
+              Unit Price (₹) <span className="text-red-500">*</span>
+            </label>
+            <input
+              id="unit_price"
+              type="number"
+              name="unit_price"
+              value={formData.unit_price}
+              onChange={handleChange}
+              required
+              min="0"
+              step="0.01"
+              placeholder="0.00"
+              className="input-base"
+            />
+          </div>
 
-            <div className="flex gap-4">
-              <button
-                type="submit"
-                disabled={loading}
-                className="flex-1 bg-emerald-600 text-white py-2 px-4 rounded-lg hover:bg-emerald-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
-              >
-                {loading ? "Adding..." : "Add Medicine"}
-              </button>
-              <button
-                type="button"
-                onClick={() => navigate("/dashboard")}
-                className="flex-1 bg-gray-300 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-400 transition-colors"
-              >
-                Cancel
-              </button>
-            </div>
-          </form>
-        </div>
+          {/* Actions */}
+          <div className="flex gap-3 pt-1">
+            <button type="submit" disabled={loading} className="btn-primary flex-1">
+              {loading ? "Adding…" : "Add Medicine"}
+            </button>
+            <button
+              type="button"
+              onClick={() => navigate("/dashboard")}
+              className="btn-outline flex-1"
+            >
+              Cancel
+            </button>
+          </div>
+        </form>
 
-        <div className="mt-6 bg-emerald-50 rounded-xl p-4 border border-emerald-100 shadow-sm">
-          <h3 className="font-semibold text-emerald-900 mb-2">Instructions:</h3>
-          <ul className="text-sm text-emerald-800 space-y-1">
-            <li>Enter the complete medicine name as it appears on the packaging</li>
-            <li>Select the appropriate category for the medicine type</li>
-            <li>Enter the selling price per unit (tablet, bottle, etc.)</li>
-            <li>All fields are required</li>
-          </ul>
+        {/* Hint */}
+        <div className="mt-4 px-4 py-3 bg-blue-50 border border-blue-100 rounded-xl text-xs text-blue-700 space-y-1">
+          <p className="font-semibold text-blue-800 mb-1">Instructions</p>
+          <p>Enter the medicine name exactly as it appears on the packaging.</p>
+          <p>After adding a medicine, proceed to <strong>Add Batch</strong> to add stock.</p>
         </div>
       </div>
     </Layout>

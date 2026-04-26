@@ -1,179 +1,109 @@
-// ```jsx id="k9x2df"
 import { NavLink } from "react-router-dom";
 import {
   LayoutDashboard,
   UserPlus,
-  Search,
+  Users,
   Pill,
   Truck,
   Package,
   ShoppingCart,
   RotateCcw,
   FileText,
-  AlertTriangle,
+  Bell,
+  LogOut,
+  CreditCard,
 } from "lucide-react";
 
 export default function Sidebar() {
-  const linkClass =
-    "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition";
+  const base =
+    "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors duration-150";
 
-  const activeClass =
-    "bg-emerald-500/20 text-emerald-100";
+  const active = "bg-blue-600/15 text-blue-100";
+  const inactive = "text-slate-400 hover:bg-slate-800 hover:text-slate-100";
 
-  const inactiveClass =
-    "text-emerald-50/80 hover:bg-emerald-500/15 hover:text-white";
+  const NavItem = ({ to, icon: Icon, label }) => (
+    <NavLink
+      to={to}
+      className={({ isActive }) => `${base} ${isActive ? active : inactive}`}
+    >
+      <Icon size={15} strokeWidth={1.8} />
+      <span>{label}</span>
+    </NavLink>
+  );
+
+  const Section = ({ title, children }) => (
+    <div>
+      <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-500 px-3 mb-1.5">
+        {title}
+      </p>
+      <div className="flex flex-col gap-0.5">{children}</div>
+    </div>
+  );
 
   return (
-    <div className="w-64 min-h-screen bg-emerald-950 border-r border-emerald-900 p-5 flex flex-col shadow-xl">
-      
+    <div className="w-60 min-h-screen bg-slate-900 border-r border-slate-800 flex flex-col">
       {/* Logo */}
-      <div className="mb-8">
-        <h2 className="text-white text-xl font-semibold">
-          MediLoop
-        </h2>
-        <p className="text-emerald-200/80 text-xs mt-1">
-          Pharmacy System
-        </p>
+      <div className="px-5 pt-6 pb-5 border-b border-slate-800">
+        <div className="flex items-center gap-2.5">
+          <div className="w-7 h-7 bg-blue-600 rounded-md flex items-center justify-center">
+            <Pill size={14} strokeWidth={2.5} className="text-white" />
+          </div>
+          <div>
+            <p className="text-white text-sm font-semibold leading-none">
+              MediLoop
+            </p>
+            <p className="text-slate-500 text-[10px] mt-0.5">
+              Pharmacy System
+            </p>
+          </div>
+        </div>
       </div>
 
-      <nav className="flex flex-col gap-6">
-
-        {/* Dashboard */}
-        <NavLink
-          to="/dashboard"
-          className={({ isActive }) =>
-            `${linkClass} ${isActive ? activeClass : inactiveClass}`
-          }
-        >
-          <LayoutDashboard size={16} />
-          <span>Dashboard</span>
-        </NavLink>
+      {/* Navigation */}
+      <nav className="flex-1 px-3 py-4 flex flex-col gap-5 overflow-y-auto">
+        {/* Overview */}
+        <NavItem to="/dashboard" icon={LayoutDashboard} label="Dashboard" />
 
         {/* Patients */}
-        <div>
-          <p className="text-emerald-200/70 text-xs uppercase mb-2 tracking-wide">
-            Patients
-          </p>
-
-          <div className="flex flex-col gap-1">
-            <NavLink
-              to="/add-patient"
-              className={({ isActive }) =>
-                `${linkClass} ${isActive ? activeClass : inactiveClass}`
-              }
-            >
-              <UserPlus size={16} />
-              Add Patient
-            </NavLink>
-
-            <NavLink
-              to="/patients"
-              className={({ isActive }) =>
-                `${linkClass} ${isActive ? activeClass : inactiveClass}`
-              }
-            >
-              <Search size={16} />
-              Search Patients
-            </NavLink>
-          </div>
-        </div>
+        <Section title="Patients">
+          <NavItem to="/add-patient" icon={UserPlus} label="Add Patient" />
+          <NavItem to="/patients" icon={Users} label="Search Patients" />
+        </Section>
 
         {/* Inventory */}
-        <div>
-          <p className="text-emerald-200/70 text-xs uppercase mb-2 tracking-wide">
-            Inventory
-          </p>
-
-          <div className="flex flex-col gap-1">
-            <NavLink
-              to="/add-medicine"
-              className={({ isActive }) =>
-                `${linkClass} ${isActive ? activeClass : inactiveClass}`
-              }
-            >
-              <Pill size={16} />
-              Add Medicine
-            </NavLink>
-
-            <NavLink
-              to="/add-supplier"
-              className={({ isActive }) =>
-                `${linkClass} ${isActive ? activeClass : inactiveClass}`
-              }
-            >
-              <Truck size={16} />
-              Suppliers
-            </NavLink>
-
-            <NavLink
-              to="/add-batch"
-              className={({ isActive }) =>
-                `${linkClass} ${isActive ? activeClass : inactiveClass}`
-              }
-            >
-              <Package size={16} />
-              Batches
-            </NavLink>
-
-            <NavLink
-              to="/sell"
-              className={({ isActive }) =>
-                `${linkClass} ${isActive ? activeClass : inactiveClass}`
-              }
-            >
-              <ShoppingCart size={16} />
-              Billing
-            </NavLink>
-          </div>
-        </div>
+        <Section title="Inventory">
+          <NavItem to="/add-medicine" icon={Pill} label="Add Medicine" />
+          <NavItem to="/add-supplier" icon={Truck} label="Suppliers" />
+          <NavItem to="/add-batch" icon={Package} label="Batches" />
+          <NavItem to="/sell" icon={ShoppingCart} label="Billing" />
+        </Section>
 
         {/* Operations */}
-        <div>
-          <p className="text-emerald-200/70 text-xs uppercase mb-2 tracking-wide">
-            Operations
-          </p>
-
-          <div className="flex flex-col gap-1">
-            <NavLink
-              to="/medicine-return"
-              className={({ isActive }) =>
-                `${linkClass} ${isActive ? activeClass : inactiveClass}`
-              }
-            >
-              <RotateCcw size={16} />
-              Returns
-            </NavLink>
-
-            <NavLink
-              to="/transactions"
-              className={({ isActive }) =>
-                `${linkClass} ${isActive ? activeClass : inactiveClass}`
-              }
-            >
-              <FileText size={16} />
-              Transactions
-            </NavLink>
-          </div>
-        </div>
+        <Section title="Operations">
+          <NavItem to="/medicine-return" icon={RotateCcw} label="Returns" />
+          <NavItem to="/transactions" icon={FileText} label="Transactions" />
+          <NavItem to="/credits" icon={CreditCard} label="Credits" />
+        </Section>
 
         {/* Alerts */}
-        <div>
-          <p className="text-emerald-200/70 text-xs uppercase mb-2 tracking-wide">
-            Alerts
-          </p>
-
-          <NavLink
-            to="/alerts"
-            className={({ isActive }) =>
-              `${linkClass} ${isActive ? activeClass : inactiveClass}`
-            }
-          >
-            <AlertTriangle size={16} />
-            Expiry Alerts
-          </NavLink>
-        </div>
+        <Section title="Alerts">
+          <NavItem to="/alerts" icon={Bell} label="Expiry Alerts" />
+        </Section>
       </nav>
+
+      {/* Logout */}
+      <div className="px-3 py-4 border-t border-slate-800">
+        <button
+          onClick={() => {
+            localStorage.clear();
+            window.location.href = "/";
+          }}
+          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-400 hover:bg-red-500/10 hover:text-red-400 transition-colors duration-150"
+        >
+          <LogOut size={15} strokeWidth={1.8} />
+          <span>Logout</span>
+        </button>
+      </div>
     </div>
   );
 }
-

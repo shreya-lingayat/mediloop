@@ -8,6 +8,9 @@ export default function SellMedicinePage() {
   const [selectedPatient, setSelectedPatient] = useState(null);
   const [medicines, setMedicines] = useState([]);
   const [selectedMedicine, setSelectedMedicine] = useState("");
+  const [medicineSearch, setMedicineSearch] = useState("");
+  const [searchResults, setSearchResults] = useState([]);
+  const [showDropdown, setShowDropdown] = useState(false);
   const [batches, setBatches] = useState([]);
   const [selectedBatch, setSelectedBatch] = useState("");
   const [quantity, setQuantity] = useState("");
@@ -17,9 +20,7 @@ export default function SellMedicinePage() {
   const [searchLoading, setSearchLoading] = useState(false);
   const [useCredits, setUseCredits] = useState(true);
 
-  useEffect(() => {
-    fetchMedicines();
-  }, []);
+  // Medicines are now searched dynamically
 
   useEffect(() => {
     if (searchTerm.trim() === "") {
@@ -43,15 +44,24 @@ export default function SellMedicinePage() {
     }
   }, [selectedMedicine]);
 
-  const fetchMedicines = async () => {
-    try {
-      const response = await fetch("http://localhost:5000/get_medicines");
-      const data = await response.json();
-      setMedicines(data);
-    } catch (error) {
-      console.error("Error fetching medicines:", error);
+  useEffect(() => {
+    if (medicineSearch.trim().length === 0) {
+      setSearchResults([]);
+      return;
     }
-  };
+    const timeoutId = setTimeout(async () => {
+      try {
+        const res = await fetch(`http://localhost:5000/search_medicine?q=${encodeURIComponent(medicineSearch)}`);
+        const data = await res.json();
+        setSearchResults(data);
+        setShowDropdown(true);
+      } catch (error) {
+        console.error("Error searching medicines:", error);
+      }
+    }, 300);
+
+    return () => clearTimeout(timeoutId);
+  }, [medicineSearch]);
 
   const searchPatients = async (term) => {
     if (term.trim() === "") {
@@ -134,7 +144,7 @@ export default function SellMedicinePage() {
         batch_id: selectedBatch,
         quantity: parseInt(quantity),
         sub_amount: subAmount,
-        medicine_name: medicines.find(m => m.medicine_id === selectedMedicine)?.medicine_name,
+        medicine_name: medicineSearch,
         batch_info: batch
       }]);
     }
@@ -191,6 +201,7 @@ export default function SellMedicinePage() {
         setSelectedPatient(null);
         setSearchTerm("");
         setSelectedMedicine("");
+        setMedicineSearch("");
         setBatches([]);
         
         // Refresh batches for current medicine
@@ -236,11 +247,11 @@ export default function SellMedicinePage() {
                   placeholder="Search patient by name..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
                 {searchLoading && (
                   <div className="absolute right-3 top-2.5">
-                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-emerald-600"></div>
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
                   </div>
                 )}
               </div>
@@ -274,18 +285,39 @@ export default function SellMedicinePage() {
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
               <h2 className="text-lg font-semibold mb-4">Select Medicine</h2>
               
-              <select
-                value={selectedMedicine}
-                onChange={(e) => setSelectedMedicine(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-              >
-                <option value="">Select medicine</option>
-                {medicines.map((medicine) => (
-                  <option key={medicine.medicine_id} value={medicine.medicine_id}>
-                    {medicine.medicine_name} - {medicine.category}
-                  </option>
-                ))}
-              </select>
+              <div className="relative">
+                <input
+                  type="text"
+                  placeholder="Search medicine..."
+                  value={medicineSearch}
+                  onChange={(e) => {
+                    setMedicineSearch(e.target.value);
+                    setSelectedMedicine("");
+                  }}
+                  onFocus={() => {
+                    if (searchResults.length > 0) setShowDropdown(true);
+                  }}
+                  onBlur={() => setTimeout(() => setShowDropdown(false), 200)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+                {showDropdown && searchResults.length > 0 && (
+                  <ul className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                    {searchResults.map((med) => (
+                      <li
+                        key={med.medicine_id}
+                        className="px-4 py-2 hover:bg-blue-50 cursor-pointer text-sm"
+                        onClick={() => {
+                          setSelectedMedicine(med.medicine_id);
+                          setMedicineSearch(`${med.medicine_name} - ${med.category}`);
+                          setShowDropdown(false);
+                        }}
+                      >
+                        {med.medicine_name} - {med.category}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
 
               {selectedMedicine && (
                 <div className="mt-4">
@@ -295,7 +327,7 @@ export default function SellMedicinePage() {
                   <select
                     value={selectedBatch}
                     onChange={(e) => setSelectedBatch(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   >
                     <option value="">Select batch</option>
                     {batches.map((batch) => (
@@ -317,7 +349,7 @@ export default function SellMedicinePage() {
                     value={quantity}
                     onChange={(e) => setQuantity(e.target.value)}
                     min="1"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     placeholder="Enter quantity"
                   />
                 </div>
@@ -326,7 +358,7 @@ export default function SellMedicinePage() {
               <button
                 onClick={addToCart}
                 disabled={!selectedBatch || !quantity}
-                className="mt-4 w-full bg-emerald-600 text-white py-2 px-4 rounded-lg hover:bg-emerald-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+                className="mt-4 w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
               >
                 Add to Cart
               </button>

@@ -1,95 +1,98 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Layout from "../components/Layout";
+import { Search } from "lucide-react";
 
 export default function AddBatchPage() {
   const [formData, setFormData] = useState({
     medicine_id: "",
     supplier_id: "",
     manufacturing_date: "",
+    expiry_date: "",
     quantity_available: "",
-    purchase_price: ""
+    purchase_price: "",
   });
-  const [medicines, setMedicines] = useState([]);
+
+  const [medicineSearch, setMedicineSearch] = useState("");
+  const [searchResults, setSearchResults] = useState([]);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [selectedMedicineName, setSelectedMedicineName] = useState("");
   const [suppliers, setSuppliers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [fetchLoading, setFetchLoading] = useState(true);
-  const [message, setMessage] = useState("");
+  const [message, setMessage] = useState({ text: "", type: "" });
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetchMedicinesAndSuppliers();
+    fetch("http://localhost:5000/get_suppliers")
+      .then((r) => r.json())
+      .then(setSuppliers)
+      .catch(() => setMessage({ text: "Failed to load suppliers.", type: "error" }))
+      .finally(() => setFetchLoading(false));
   }, []);
 
-  const fetchMedicinesAndSuppliers = async () => {
-    try {
-      const [medicinesResponse, suppliersResponse] = await Promise.all([
-        fetch("http://localhost:5000/get_medicines"),
-        fetch("http://localhost:5000/get_suppliers")
-      ]);
+  useEffect(() => {
+    if (!medicineSearch.trim()) { setSearchResults([]); return; }
+    const t = setTimeout(async () => {
+      try {
+        const r = await fetch(`http://localhost:5000/search_medicine?q=${encodeURIComponent(medicineSearch)}`);
+        const d = await r.json();
+        setSearchResults(d);
+        setShowDropdown(true);
+      } catch {}
+    }, 300);
+    return () => clearTimeout(t);
+  }, [medicineSearch]);
 
-      const medicinesData = await medicinesResponse.json();
-      const suppliersData = await suppliersResponse.json();
-
-      setMedicines(medicinesData);
-      setSuppliers(suppliersData);
-    } catch (error) {
-      console.error("Error fetching data:", error);
-      setMessage("Failed to load medicines and suppliers");
-    } finally {
-      setFetchLoading(false);
-    }
-  };
-
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
-  };
+  const handleChange = (e) =>
+    setFormData({ ...formData, [e.target.name]: e.target.value });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setMessage("");
+    setMessage({ text: "", type: "" });
 
     try {
-      const response = await fetch("http://localhost:5000/add_batch", {
+      const res = await fetch("http://localhost:5000/add_batch", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
       });
+      const data = await res.json();
 
-      const data = await response.json();
-
-      if (response.ok) {
-        setMessage("Batch added successfully!");
+      if (res.ok) {
+        setMessage({ text: "Batch added successfully.", type: "success" });
         setFormData({
           medicine_id: "",
           supplier_id: "",
           manufacturing_date: "",
+          expiry_date: "",
           quantity_available: "",
-          purchase_price: ""
+          purchase_price: "",
         });
-        setTimeout(() => navigate("/dashboard"), 2000);
+        setMedicineSearch("");
+        setSelectedMedicineName("");
+        setTimeout(() => navigate("/dashboard"), 1800);
       } else {
-        setMessage(data.error || "Failed to add batch");
+        setMessage({ text: data.error || "Failed to add batch.", type: "error" });
       }
-    } catch (error) {
-      setMessage("Server error. Please try again.");
-      console.error("Error:", error);
+    } catch {
+      setMessage({ text: "Server error. Please try again.", type: "error" });
     } finally {
       setLoading(false);
     }
   };
 
+  const alertClass = {
+    success: "bg-emerald-50 border border-emerald-200 text-emerald-700",
+    error: "bg-red-50 border border-red-200 text-red-700",
+  };
+
   if (fetchLoading) {
     return (
       <Layout>
-        <div className="text-center py-8">
-          <div className="text-lg">Loading medicines and suppliers...</div>
+        <div className="text-center py-12 text-sm text-gray-400">
+          Loading data…
         </div>
       </Layout>
     );
@@ -97,142 +100,180 @@ export default function AddBatchPage() {
 
   return (
     <Layout>
-      <div className="max-w-2xl mx-auto">
-        <h1 className="text-3xl font-bold mb-6">Add Medicine Batch</h1>
+      <div className="max-w-lg">
+        {/* Header */}
+        <div className="mb-6">
+          <h1 className="text-xl font-semibold text-gray-800">Add Batch</h1>
+          <p className="text-sm text-gray-500 mt-0.5">
+            Add a new stock batch for an existing medicine
+          </p>
+        </div>
 
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
-          {message && (
-            <div className={`mb-4 p-4 rounded-lg ${
-              message.includes("success") 
-                ? "bg-green-100 text-green-700 border border-green-400" 
-                : "bg-red-100 text-red-700 border border-red-400"
-            }`}>
-              {message}
+        {/* Form */}
+        <form
+          onSubmit={handleSubmit}
+          className="bg-white border border-gray-200 rounded-xl p-6 space-y-5"
+        >
+          {message.text && (
+            <div className={`text-sm px-3.5 py-2.5 rounded-lg ${alertClass[message.type]}`}>
+              {message.text}
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
-              <label htmlFor="medicine_id" className="block text-sm font-medium text-gray-700 mb-2">
-                Medicine
-              </label>
-              <select
-                id="medicine_id"
-                name="medicine_id"
-                value={formData.medicine_id}
-                onChange={handleChange}
+          {/* Medicine Search */}
+          <div>
+            <label className="label-base">
+              Medicine <span className="text-red-500">*</span>
+            </label>
+            <div className="relative">
+              <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Type to search medicine…"
+                value={selectedMedicineName || medicineSearch}
+                onChange={(e) => {
+                  setMedicineSearch(e.target.value);
+                  setSelectedMedicineName("");
+                  setFormData({ ...formData, medicine_id: "" });
+                }}
+                onFocus={() => { if (searchResults.length > 0) setShowDropdown(true); }}
+                onBlur={() => setTimeout(() => setShowDropdown(false), 200)}
+                className="input-base pl-9"
                 required
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-              >
-                <option value="">Select medicine</option>
-                {medicines.map((medicine) => (
-                  <option key={medicine.medicine_id} value={medicine.medicine_id}>
-                    {medicine.medicine_name} - {medicine.category}
-                  </option>
-                ))}
-              </select>
+              />
+              {showDropdown && searchResults.length > 0 && (
+                <ul className="absolute z-20 w-full mt-1 bg-white border border-gray-200 rounded-xl overflow-hidden">
+                  {searchResults.map((med) => (
+                    <li
+                      key={med.medicine_id}
+                      className="px-4 py-2.5 text-sm hover:bg-blue-50 cursor-pointer text-gray-700 border-b border-gray-100 last:border-0"
+                      onClick={() => {
+                        setFormData({ ...formData, medicine_id: med.medicine_id });
+                        setSelectedMedicineName(`${med.medicine_name} (${med.category})`);
+                        setShowDropdown(false);
+                        setMedicineSearch("");
+                      }}
+                    >
+                      <span className="font-medium">{med.medicine_name}</span>
+                      <span className="text-gray-400 ml-2 text-xs">{med.category}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
+          </div>
 
-            <div>
-              <label htmlFor="supplier_id" className="block text-sm font-medium text-gray-700 mb-2">
-                Supplier
-              </label>
-              <select
-                id="supplier_id"
-                name="supplier_id"
-                value={formData.supplier_id}
-                onChange={handleChange}
-                required
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-              >
-                <option value="">Select supplier</option>
-                {suppliers.map((supplier) => (
-                  <option key={supplier.supplier_id} value={supplier.supplier_id}>
-                    {supplier.supplier_name} - {supplier.contact_no}
-                  </option>
-                ))}
-              </select>
-            </div>
+          {/* Supplier */}
+          <div>
+            <label htmlFor="supplier_id" className="label-base">
+              Supplier <span className="text-red-500">*</span>
+            </label>
+            <select
+              id="supplier_id"
+              name="supplier_id"
+              value={formData.supplier_id}
+              onChange={handleChange}
+              required
+              className="input-base"
+            >
+              <option value="">Select supplier</option>
+              {suppliers.map((s) => (
+                <option key={s.supplier_id} value={s.supplier_id}>
+                  {s.supplier_name} — {s.contact_no}
+                </option>
+              ))}
+            </select>
+          </div>
 
+          {/* Dates side-by-side */}
+          <div className="grid grid-cols-2 gap-4">
             <div>
-              <label htmlFor="manufacturing_date" className="block text-sm font-medium text-gray-700 mb-2">
-                Manufacturing Date
+              <label htmlFor="manufacturing_date" className="label-base">
+                Mfg. Date <span className="text-red-500">*</span>
               </label>
               <input
-                type="date"
                 id="manufacturing_date"
+                type="date"
                 name="manufacturing_date"
                 value={formData.manufacturing_date}
                 onChange={handleChange}
                 required
-                max={new Date().toISOString().split('T')[0]}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                max={new Date().toISOString().split("T")[0]}
+                className="input-base"
               />
             </div>
-
             <div>
-              <label htmlFor="quantity_available" className="block text-sm font-medium text-gray-700 mb-2">
-                Quantity Available
+              <label htmlFor="expiry_date" className="label-base">
+                Expiry Date <span className="text-red-500">*</span>
               </label>
               <input
-                type="number"
+                id="expiry_date"
+                type="date"
+                name="expiry_date"
+                value={formData.expiry_date}
+                onChange={handleChange}
+                required
+                min={new Date().toISOString().split("T")[0]}
+                className="input-base"
+              />
+            </div>
+          </div>
+
+          {/* Qty + Price side-by-side */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label htmlFor="quantity_available" className="label-base">
+                Quantity <span className="text-red-500">*</span>
+              </label>
+              <input
                 id="quantity_available"
+                type="number"
                 name="quantity_available"
                 value={formData.quantity_available}
                 onChange={handleChange}
                 required
                 min="1"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-                placeholder="Enter quantity"
+                placeholder="e.g. 100"
+                className="input-base"
               />
             </div>
-
             <div>
-              <label htmlFor="purchase_price" className="block text-sm font-medium text-gray-700 mb-2">
-                Purchase Price per Unit (INR)
+              <label htmlFor="purchase_price" className="label-base">
+                Purchase Price (₹) <span className="text-red-500">*</span>
               </label>
               <input
-                type="number"
                 id="purchase_price"
+                type="number"
                 name="purchase_price"
                 value={formData.purchase_price}
                 onChange={handleChange}
                 required
                 min="0"
                 step="0.01"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-                placeholder="Enter purchase price per unit"
+                placeholder="0.00"
+                className="input-base"
               />
             </div>
+          </div>
 
-            <div className="flex gap-4">
-              <button
-                type="submit"
-                disabled={loading}
-                className="flex-1 bg-emerald-600 text-white py-2 px-4 rounded-lg hover:bg-emerald-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
-              >
-                {loading ? "Adding..." : "Add Batch"}
-              </button>
-              <button
-                type="button"
-                onClick={() => navigate("/dashboard")}
-                className="flex-1 bg-gray-300 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-400 transition-colors"
-              >
-                Cancel
-              </button>
-            </div>
-          </form>
-        </div>
+          <div className="flex gap-3 pt-1">
+            <button type="submit" disabled={loading} className="btn-primary flex-1">
+              {loading ? "Adding…" : "Add Batch"}
+            </button>
+            <button
+              type="button"
+              onClick={() => navigate("/dashboard")}
+              className="btn-outline flex-1"
+            >
+              Cancel
+            </button>
+          </div>
+        </form>
 
-        <div className="mt-6 bg-emerald-50 rounded-xl p-4 border border-emerald-100 shadow-sm">
-          <h3 className="font-semibold text-emerald-900 mb-2">Batch Information:</h3>
-          <ul className="text-sm text-emerald-800 space-y-1">
-            <li>Select the medicine and supplier from the dropdown lists</li>
-            <li>Enter the manufacturing date (cannot be future dated)</li>
-            <li>Enter the available quantity in this batch</li>
-            <li>Enter the purchase price per unit for tracking</li>
-            <li>Each batch will be tracked individually for expiry and sales</li>
-          </ul>
+        <div className="mt-4 px-4 py-3 bg-blue-50 border border-blue-100 rounded-xl text-xs text-blue-700 space-y-1">
+          <p className="font-semibold text-blue-800 mb-1">Instructions</p>
+          <p>Manufacturing date cannot be in the future; expiry date cannot be in the past.</p>
+          <p>Each batch is tracked individually for sales and expiry monitoring.</p>
         </div>
       </div>
     </Layout>

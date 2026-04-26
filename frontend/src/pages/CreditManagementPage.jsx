@@ -91,7 +91,7 @@ export default function CreditManagementPage() {
           <h1 className="text-3xl font-bold">Credit Management</h1>
           <button
             onClick={() => setShowAddForm(!showAddForm)}
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+            className="bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 transition-colors"
           >
             {showAddForm ? "Cancel" : "Add Credit"}
           </button>
@@ -123,7 +123,7 @@ export default function CreditManagementPage() {
                     value={formData.patient_id}
                     onChange={handleInputChange}
                     required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                     placeholder="Enter patient ID"
                   />
                 </div>
@@ -140,7 +140,7 @@ export default function CreditManagementPage() {
                     required
                     min="0"
                     step="0.01"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                     placeholder="Enter credit amount"
                   />
                 </div>
@@ -164,12 +164,12 @@ export default function CreditManagementPage() {
           </div>
         )}
 
-        <div className="bg-white rounded-lg shadow-md p-6">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
           <h2 className="text-xl font-semibold mb-4">Active Credits</h2>
           
           {loading ? (
             <div className="text-center py-8">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600 mx-auto"></div>
               <p className="text-gray-500 mt-2">Loading credits...</p>
             </div>
           ) : credits.length === 0 ? (
@@ -185,10 +185,7 @@ export default function CreditManagementPage() {
                 <thead className="bg-gray-50">
                   <tr>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Credit ID
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Patient ID
+                      Patient
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Amount
@@ -210,10 +207,7 @@ export default function CreditManagementPage() {
                     return (
                       <tr key={credit.credit_id} className="hover:bg-gray-50">
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                          {credit.credit_id}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {credit.patient_id}
+                          {credit.p_name}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                           INR {credit.amount}
@@ -238,9 +232,9 @@ export default function CreditManagementPage() {
           )}
         </div>
 
-        <div className="mt-6 bg-blue-50 rounded-lg p-4">
-          <h3 className="font-semibold text-blue-900 mb-2">Credit Information:</h3>
-          <ul className="text-sm text-blue-800 space-y-1">
+        <div className="mt-6 bg-emerald-50 rounded-xl p-4 border border-emerald-100 shadow-sm">
+          <h3 className="font-semibold text-emerald-900 mb-2">Credit Information:</h3>
+          <ul className="text-sm text-emerald-800 space-y-1">
             <li>All credits are valid for 30 days from the issue date</li>
             <li>Credits expire automatically after 30 days</li>
             <li>Patients can use credits for medicine purchases</li>

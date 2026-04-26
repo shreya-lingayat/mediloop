@@ -76,7 +76,7 @@ export default function Dashboard() {
             title="Total Patients"
             value={stats.total_patients}
             icon="👤"
-            color="text-blue-500"
+            color="text-emerald-600"
           />
 
           <Card
@@ -117,28 +117,28 @@ export default function Dashboard() {
 
             <button
               onClick={() => navigate("/add-patient")}
-              className="bg-green-600 hover:bg-green-700 text-white py-2.5 rounded-lg text-sm"
+              className="bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 rounded-lg text-sm"
             >
               Add Patient
             </button>
 
             <button
               onClick={() => navigate("/add-medicine")}
-              className="bg-green-600 hover:bg-green-700 text-white py-2.5 rounded-lg text-sm"
+              className="bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 rounded-lg text-sm"
             >
               Add Medicine
             </button>
 
             <button
               onClick={() => navigate("/sell")}
-              className="bg-purple-600 hover:bg-purple-700 text-white py-2.5 rounded-lg text-sm"
+              className="bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 rounded-lg text-sm transition"
             >
               Sell Medicine
             </button>
 
             <button
               onClick={() => navigate("/add-batch")}
-              className="bg-orange-600 hover:bg-orange-700 text-white py-2.5 rounded-lg text-sm"
+              className="bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 rounded-lg text-sm transition"
             >
               Add Batch
             </button>

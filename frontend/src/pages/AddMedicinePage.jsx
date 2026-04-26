@@ -59,7 +59,7 @@ export default function AddMedicinePage() {
       <div className="max-w-2xl mx-auto">
         <h1 className="text-3xl font-bold mb-6">Add Medicine</h1>
 
-        <div className="bg-white rounded-lg shadow-md p-6">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
           {message && (
             <div className={`mb-4 p-4 rounded-lg ${
               message.includes("success") 
@@ -82,7 +82,7 @@ export default function AddMedicinePage() {
                 value={formData.medicine_name}
                 onChange={handleChange}
                 required
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                 placeholder="Enter medicine name"
               />
             </div>
@@ -97,7 +97,7 @@ export default function AddMedicinePage() {
                 value={formData.category}
                 onChange={handleChange}
                 required
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
               >
                 <option value="">Select category</option>
                 <option value="Tablet">Tablet</option>
@@ -123,7 +123,7 @@ export default function AddMedicinePage() {
                 required
                 min="0"
                 step="0.01"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                 placeholder="Enter unit price"
               />
             </div>
@@ -132,7 +132,7 @@ export default function AddMedicinePage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+                className="flex-1 bg-emerald-600 text-white py-2 px-4 rounded-lg hover:bg-emerald-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
               >
                 {loading ? "Adding..." : "Add Medicine"}
               </button>
@@ -147,9 +147,9 @@ export default function AddMedicinePage() {
           </form>
         </div>
 
-        <div className="mt-6 bg-blue-50 rounded-lg p-4">
-          <h3 className="font-semibold text-blue-900 mb-2">Instructions:</h3>
-          <ul className="text-sm text-blue-800 space-y-1">
+        <div className="mt-6 bg-emerald-50 rounded-xl p-4 border border-emerald-100 shadow-sm">
+          <h3 className="font-semibold text-emerald-900 mb-2">Instructions:</h3>
+          <ul className="text-sm text-emerald-800 space-y-1">
             <li>Enter the complete medicine name as it appears on the packaging</li>
             <li>Select the appropriate category for the medicine type</li>
             <li>Enter the selling price per unit (tablet, bottle, etc.)</li>

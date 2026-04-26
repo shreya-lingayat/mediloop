@@ -3,8 +3,11 @@ import { useNavigate } from "react-router-dom";
 import { Eye, EyeOff, Activity, Lock, User, AlertCircle } from "lucide-react";
 
 export default function LoginPage() {
+  const [mode, setMode] = useState("login");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [email, setEmail] = useState("");
+  const [token, setToken] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -37,13 +40,89 @@ export default function LoginPage() {
     }
   };
 
+  const handleRegister = async (e) => {
+    e.preventDefault();
+    setError("");
+    setLoading(true);
+    try {
+      const res = await fetch("http://localhost:5000/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password, email }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error || "Registration failed.");
+        return;
+      }
+      setError("Registration successful. Please sign in.");
+      setMode("login");
+      setPassword("");
+    } catch {
+      setError("Unable to reach the server. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleForgot = async (e) => {
+    e.preventDefault();
+    setError("");
+    setLoading(true);
+    try {
+      const res = await fetch("http://localhost:5000/forgot_password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, email }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error || "Unable to generate reset token.");
+        return;
+      }
+      setToken(data.reset_token || "");
+      setError(`Reset token generated: ${data.reset_token}`);
+      setMode("reset");
+      setPassword("");
+    } catch {
+      setError("Unable to reach the server. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleReset = async (e) => {
+    e.preventDefault();
+    setError("");
+    setLoading(true);
+    try {
+      const res = await fetch("http://localhost:5000/reset_password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, token, new_password: password }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error || "Password reset failed.");
+        return;
+      }
+      setError("Password reset successful. Please sign in.");
+      setMode("login");
+      setPassword("");
+    } catch {
+      setError("Unable to reach the server. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
 
 return (
   <div className="min-h-screen bg-[#f4f7fb] flex items-center justify-center px-4">
     <div className="w-full max-w-5xl bg-white rounded-2xl shadow-lg overflow-hidden grid grid-cols-1 lg:grid-cols-2">
 
       {/* LEFT SIDE - Branding */}
-      <div className="hidden lg:flex flex-col justify-between p-10 bg-gradient-to-br from-blue-600 to-blue-500 text-white">
+      <div className="hidden lg:flex flex-col justify-between p-10 bg-gradient-to-br from-emerald-800 to-emerald-700 text-white">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
             <Activity className="w-5 h-5" />
@@ -55,13 +134,13 @@ return (
           <h2 className="text-3xl font-bold leading-snug">
             Smart Pharmacy <br /> Management System
           </h2>
-          <p className="mt-3 text-blue-100 text-sm">
+          <p className="mt-3 text-emerald-100 text-sm">
             Manage inventory, billing, expiry tracking and patient credits
             efficiently in one platform.
           </p>
         </div>
 
-        <div className="text-sm text-blue-100">
+        <div className="text-sm text-emerald-100">
           Secure • Reliable • Fast
         </div>
       </div>
@@ -82,7 +161,18 @@ return (
           </div>
         )}
 
-        <form onSubmit={handleLogin} className="space-y-4">
+        <form
+          onSubmit={
+            mode === "login"
+              ? handleLogin
+              : mode === "register"
+              ? handleRegister
+              : mode === "forgot"
+              ? handleForgot
+              : handleReset
+          }
+          className="space-y-4"
+        >
 
           {/* Username */}
           <div>
@@ -97,10 +187,38 @@ return (
                 onChange={(e) => setUsername(e.target.value)}
                 placeholder="Enter username"
                 required
-                className="w-full border border-gray-300 rounded-lg pl-10 pr-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full border border-gray-300 rounded-lg pl-10 pr-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
               />
             </div>
           </div>
+
+          {(mode === "register" || mode === "forgot") && (
+            <div>
+              <label className="text-sm font-medium text-gray-600">Email</label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Enter email"
+                required
+                className="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              />
+            </div>
+          )}
+
+          {mode === "reset" && (
+            <div>
+              <label className="text-sm font-medium text-gray-600">Reset Token</label>
+              <input
+                type="text"
+                value={token}
+                onChange={(e) => setToken(e.target.value)}
+                placeholder="Enter reset token"
+                required
+                className="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              />
+            </div>
+          )}
 
           {/* Password */}
           <div>
@@ -115,7 +233,7 @@ return (
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Enter password"
                 required
-                className="w-full border border-gray-300 rounded-lg pl-10 pr-10 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full border border-gray-300 rounded-lg pl-10 pr-10 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
               />
               <button
                 type="button"
@@ -135,11 +253,25 @@ return (
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2.5 rounded-lg text-sm font-medium transition"
+            className="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 rounded-lg text-sm font-medium transition"
           >
-            {loading ? "Signing in..." : "Sign in"}
+            {loading
+              ? "Please wait..."
+              : mode === "login"
+              ? "Sign in"
+              : mode === "register"
+              ? "Register"
+              : mode === "forgot"
+              ? "Generate reset token"
+              : "Reset password"}
           </button>
         </form>
+
+        <div className="mt-4 flex gap-3 text-xs">
+          <button onClick={() => setMode("login")} className="text-emerald-700 hover:underline">Sign in</button>
+          <button onClick={() => setMode("register")} className="text-emerald-700 hover:underline">Register</button>
+          <button onClick={() => setMode("forgot")} className="text-emerald-700 hover:underline">Forgot password</button>
+        </div>
 
         <p className="text-xs text-gray-400 mt-6 text-center">
           © 2026 MediLoop • Pharmacy Management System

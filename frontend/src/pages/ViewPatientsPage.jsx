@@ -6,6 +6,9 @@ export default function ViewPatientsPage() {
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(false);
   const [selectedPatient, setSelectedPatient] = useState(null);
+  const [history, setHistory] = useState(null);
+  const [editForm, setEditForm] = useState({ name: "", contact: "", address: "" });
+  const [message, setMessage] = useState("");
 
   // 🔹 Search effect
   useEffect(() => {
@@ -29,7 +32,8 @@ export default function ViewPatientsPage() {
         `http://localhost:5000/search_patient?name=${encodeURIComponent(searchTerm)}`
       );
       const data = await res.json();
-      setPatients(data);
+      console.log("search_patient response:", data);
+      setPatients(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error(err);
       setPatients([]);
@@ -41,6 +45,31 @@ export default function ViewPatientsPage() {
   // 🔹 Select patient
   const selectPatient = (patient) => {
     setSelectedPatient(patient);
+    setEditForm({
+      name: patient.p_name || "",
+      contact: patient.contact_no || "",
+      address: patient.address || "",
+    });
+    fetch(`http://localhost:5000/patient_medicine_history/${patient.patient_id}`)
+      .then((res) => res.json())
+      .then((data) => setHistory(data))
+      .catch(() => setHistory(null));
+  };
+
+  const updatePatient = async () => {
+    if (!selectedPatient) return;
+    const res = await fetch(`http://localhost:5000/update_patient/${selectedPatient.patient_id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(editForm),
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      setMessage(data.error || "Unable to update patient");
+      return;
+    }
+    setMessage("Patient updated successfully.");
+    searchPatients(search);
   };
 
   return (
@@ -89,8 +118,8 @@ export default function ViewPatientsPage() {
               onClick={() => selectPatient(patient)}
               className={`bg-white border rounded-xl p-4 cursor-pointer transition ${
                 selectedPatient?.patient_id === patient.patient_id
-                  ? "border-blue-500 bg-blue-50"
-                  : "border-gray-200 hover:border-gray-300"
+                  ? "border-emerald-500 bg-emerald-50"
+                  : "border-gray-200 hover:border-emerald-200"
               }`}
             >
               <div className="flex justify-between items-center">
@@ -114,53 +143,48 @@ export default function ViewPatientsPage() {
           ))}
         </div>
 
-        {/* 🔹 Credit Section */}
+        {message && (
+          <div className="text-sm text-emerald-700 bg-emerald-50 border border-emerald-100 px-3 py-2 rounded-lg">
+            {message}
+          </div>
+        )}
+
         {selectedPatient && (
-          <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
+          <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm space-y-5">
+            <h3 className="text-md font-semibold text-gray-800">Patient Profile</h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+              <input value={editForm.name} onChange={(e) => setEditForm({ ...editForm, name: e.target.value })} className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+              <input value={editForm.contact} onChange={(e) => setEditForm({ ...editForm, contact: e.target.value })} className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+              <input value={editForm.address} onChange={(e) => setEditForm({ ...editForm, address: e.target.value })} className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+            </div>
+            <button onClick={updatePatient} className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg px-4 py-2 text-sm">Update Patient</button>
 
-            <h3 className="text-md font-semibold text-gray-800 mb-4">
-              Credit Details
-            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+              <div className="bg-emerald-50 rounded-lg p-3 text-sm">Credits Earned: ₹{history?.credit_summary?.earned ?? 0}</div>
+              <div className="bg-emerald-50 rounded-lg p-3 text-sm">Credits Used: ₹{history?.credit_summary?.used ?? 0}</div>
+              <div className="bg-emerald-50 rounded-lg p-3 text-sm">Credits Remaining: ₹{history?.credit_summary?.remaining ?? 0}</div>
+            </div>
 
-            {selectedPatient.credits && selectedPatient.credits.length > 0 ? (
-              <div className="space-y-3">
-                {selectedPatient.credits.map((credit) => {
-                  const isActive =
-                    new Date(credit.expiry_date) > new Date();
-
-                  return (
-                    <div
-                      key={credit.credit_id}
-                      className="border border-gray-200 rounded-lg p-3 flex justify-between items-center"
-                    >
-                      <div>
-                        <p className="text-sm font-medium text-gray-800">
-                          ₹ {credit.amount}
-                        </p>
-                        <p className="text-xs text-gray-500">
-                          Issued:{" "}
-                          {new Date(credit.issue_date).toLocaleDateString()}
-                        </p>
-                      </div>
-
-                      <span
-                        className={`text-xs px-2 py-1 rounded-full ${
-                          isActive
-                            ? "bg-green-100 text-green-700"
-                            : "bg-red-100 text-red-600"
-                        }`}
-                      >
-                        {isActive ? "Active" : "Expired"}
-                      </span>
-                    </div>
-                  );
-                })}
+            <div>
+              <p className="text-sm font-semibold mb-2">Purchases</p>
+              <div className="space-y-2">
+                {(history?.purchases || []).slice(0, 8).map((p, idx) => (
+                  <div key={`${p.transaction_id}-${idx}`} className="text-xs bg-gray-50 rounded-lg p-2">
+                    {p.medicine_name} | Qty {p.quantity} | {new Date(p.transaction_date).toLocaleDateString()}
+                  </div>
+                ))}
               </div>
-            ) : (
-              <p className="text-sm text-gray-500">
-                No credits available for this patient
-              </p>
-            )}
+            </div>
+            <div>
+              <p className="text-sm font-semibold mb-2">Returns</p>
+              <div className="space-y-2">
+                {(history?.returns || []).slice(0, 8).map((r) => (
+                  <div key={r.return_id} className="text-xs bg-gray-50 rounded-lg p-2">
+                    Qty {r.quantity} | {new Date(r.return_date).toLocaleDateString()} | {r.return_status}
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         )}
       </div>

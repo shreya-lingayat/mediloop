@@ -15,6 +15,7 @@ export default function SellMedicinePage() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [searchLoading, setSearchLoading] = useState(false);
+  const [useCredits, setUseCredits] = useState(true);
 
   useEffect(() => {
     fetchMedicines();
@@ -62,7 +63,8 @@ export default function SellMedicinePage() {
     try {
       const response = await fetch(`http://localhost:5000/search_patient?name=${encodeURIComponent(term)}`);
       const data = await response.json();
-      setPatients(data);
+      console.log("search_patient response:", data);
+      setPatients(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error("Error searching patients:", error);
       setPatients([]);
@@ -170,6 +172,7 @@ export default function SellMedicinePage() {
         },
         body: JSON.stringify({
           patient_id: selectedPatient.patient_id,
+          use_credits: useCredits,
           cart: cart.map(item => ({
             batch_id: item.batch_id,
             quantity: item.quantity,
@@ -181,7 +184,9 @@ export default function SellMedicinePage() {
       const data = await response.json();
 
       if (response.ok) {
-        setMessage(`Sale completed successfully! Transaction ID: ${data.transaction_id}`);
+        setMessage(
+          `Sale completed. Used credits: INR ${(data.credits_used || 0).toFixed(2)} | Remaining credits: INR ${(data.remaining_credits || 0).toFixed(2)} | Final bill: INR ${(data.final_amount || 0).toFixed(2)}`
+        );
         setCart([]);
         setSelectedPatient(null);
         setSearchTerm("");
@@ -222,7 +227,7 @@ export default function SellMedicinePage() {
           {/* Left Column - Patient and Medicine Selection */}
           <div className="space-y-6">
             {/* Patient Selection */}
-            <div className="bg-white rounded-lg shadow-md p-6">
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
               <h2 className="text-lg font-semibold mb-4">Select Patient</h2>
               
               <div className="relative">
@@ -231,11 +236,11 @@ export default function SellMedicinePage() {
                   placeholder="Search patient by name..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                 />
                 {searchLoading && (
                   <div className="absolute right-3 top-2.5">
-                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-emerald-600"></div>
                   </div>
                 )}
               </div>
@@ -243,7 +248,7 @@ export default function SellMedicinePage() {
               {selectedPatient && (
                 <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded-lg">
                   <p className="font-medium text-green-900">Selected: {selectedPatient.p_name}</p>
-                  <p className="text-sm text-green-700">ID: {selectedPatient.patient_id}</p>
+                  <p className="text-sm text-green-700">Available credits: INR {Number(selectedPatient.total_credits || 0).toFixed(2)}</p>
                 </div>
               )}
 
@@ -266,13 +271,13 @@ export default function SellMedicinePage() {
             </div>
 
             {/* Medicine Selection */}
-            <div className="bg-white rounded-lg shadow-md p-6">
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
               <h2 className="text-lg font-semibold mb-4">Select Medicine</h2>
               
               <select
                 value={selectedMedicine}
                 onChange={(e) => setSelectedMedicine(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
               >
                 <option value="">Select medicine</option>
                 {medicines.map((medicine) => (
@@ -290,12 +295,12 @@ export default function SellMedicinePage() {
                   <select
                     value={selectedBatch}
                     onChange={(e) => setSelectedBatch(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                   >
                     <option value="">Select batch</option>
                     {batches.map((batch) => (
                       <option key={batch.batch_id} value={batch.batch_id}>
-                        Batch {batch.batch_id} - {batch.quantity_available} units available
+                        Stock {batch.quantity_available} units available
                       </option>
                     ))}
                   </select>
@@ -312,7 +317,7 @@ export default function SellMedicinePage() {
                     value={quantity}
                     onChange={(e) => setQuantity(e.target.value)}
                     min="1"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                     placeholder="Enter quantity"
                   />
                 </div>
@@ -321,7 +326,7 @@ export default function SellMedicinePage() {
               <button
                 onClick={addToCart}
                 disabled={!selectedBatch || !quantity}
-                className="mt-4 w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+                className="mt-4 w-full bg-emerald-600 text-white py-2 px-4 rounded-lg hover:bg-emerald-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
               >
                 Add to Cart
               </button>
@@ -329,7 +334,7 @@ export default function SellMedicinePage() {
           </div>
 
           {/* Right Column - Cart */}
-          <div className="bg-white rounded-lg shadow-md p-6">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
             <h2 className="text-lg font-semibold mb-4">Shopping Cart</h2>
             
             {cart.length === 0 ? (
@@ -346,7 +351,7 @@ export default function SellMedicinePage() {
                     <div className="flex justify-between items-start">
                       <div className="flex-1">
                         <h4 className="font-medium">{item.medicine_name}</h4>
-                        <p className="text-sm text-gray-500">Batch: {item.batch_id}</p>
+                        <p className="text-sm text-gray-500">Batch linked</p>
                         <p className="text-sm text-gray-500">
                           Qty: {item.quantity} × INR {(item.sub_amount / item.quantity).toFixed(2)}
                         </p>
@@ -373,6 +378,10 @@ export default function SellMedicinePage() {
                       INR {getTotalAmount().toFixed(2)}
                     </span>
                   </div>
+                  <label className="mt-3 flex items-center gap-2 text-sm text-gray-600">
+                    <input type="checkbox" checked={useCredits} onChange={(e) => setUseCredits(e.target.checked)} />
+                    Use patient credits
+                  </label>
                 </div>
 
                 <button

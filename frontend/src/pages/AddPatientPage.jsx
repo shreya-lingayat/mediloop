@@ -45,6 +45,10 @@ export default function AddPatientPage() {
       });
 
       const data = await res.json();
+      if (!res.ok) {
+        setMessage(data.error || "Error adding patient");
+        return;
+      }
       setMessage(data.msg || "Patient added successfully");
 
       setPatient({

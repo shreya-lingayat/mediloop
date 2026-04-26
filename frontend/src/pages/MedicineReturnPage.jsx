@@ -27,6 +27,17 @@ export default function MedicineReturnPage() {
 
   // 📦 Fetch transactions
   useEffect(() => {
+    const fetchTransactions = async () => {
+      try {
+        const res = await fetch(
+          `http://localhost:5000/patient_medicine_history/${selectedPatient.patient_id}`
+        );
+        const data = await res.json();
+        setTransactions(data.purchases || []);
+      } catch {
+        setTransactions([]);
+      }
+    };
     if (selectedPatient) fetchTransactions();
   }, [selectedPatient]);
 
@@ -37,7 +48,8 @@ export default function MedicineReturnPage() {
         `http://localhost:5000/search_patient?name=${encodeURIComponent(term)}`
       );
       const data = await res.json();
-      setPatients(data);
+      console.log("search_patient response:", data);
+      setPatients(Array.isArray(data) ? data : []);
     } catch {
       setPatients([]);
     } finally {
@@ -50,18 +62,6 @@ export default function MedicineReturnPage() {
     setSearchTerm(p.p_name);
     setPatients([]);
     setSelectedTransaction(null);
-  };
-
-  const fetchTransactions = async () => {
-    try {
-      const res = await fetch(
-        `http://localhost:5000/patient_medicine_history/${selectedPatient.patient_id}`
-      );
-      const data = await res.json();
-      setTransactions(data);
-    } catch {
-      setTransactions([]);
-    }
   };
 
   const handleReturn = async (e) => {

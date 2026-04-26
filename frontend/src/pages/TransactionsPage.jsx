@@ -77,7 +77,7 @@ export default function TransactionsPage() {
                     </p>
 
                     <p className="text-xs text-gray-400">
-                      ID: {t.transaction_id}
+                      Transaction recorded
                     </p>
 
                     <p className="text-xs text-gray-400">
@@ -94,7 +94,7 @@ export default function TransactionsPage() {
                     </p>
 
                     {t.credits_used !== undefined && (
-                      <p className="text-xs text-blue-500">
+                      <p className="text-xs text-emerald-600">
                         Credits used: ₹ {t.credits_used}
                       </p>
                     )}

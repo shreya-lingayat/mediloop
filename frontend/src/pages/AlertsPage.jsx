@@ -36,7 +36,7 @@ export default function AlertsPage() {
   return (
     <Layout>
       <div className="max-w-6xl mx-auto">
-        <h1 className="text-3xl font-bold mb-6 text-red-600">Expiry Alerts</h1>
+        <h1 className="text-3xl font-bold mb-6 text-emerald-700">Expiry Alerts</h1>
 
         {loading && (
           <div className="text-center py-8">
@@ -62,7 +62,7 @@ export default function AlertsPage() {
                 <svg className="h-5 w-5 text-blue-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                <p className="text-blue-900 font-medium">
+                <p className="text-emerald-900 font-medium">
                   Found {expiryAlerts.length} batch{expiryAlerts.length > 1 ? 'es' : ''} expiring within 30 days
                 </p>
               </div>
@@ -91,7 +91,7 @@ export default function AlertsPage() {
                       </div>
                       <div>
                         <h3 className="text-lg font-semibold">{alert.medicine_name}</h3>
-                        <p className="text-sm opacity-75">Batch ID: {alert.batch_id}</p>
+                        <p className="text-sm opacity-75">Batch linked</p>
                       </div>
                     </div>
 
@@ -117,9 +117,7 @@ export default function AlertsPage() {
                     </div>
 
                     <div className="mt-4 pt-4 border-t border-current border-opacity-20">
-                      <p className="text-sm opacity-75">
-                        Manufacturing Date: {new Date(alert.manufacturing_date).toLocaleDateString()}
-                      </p>
+                      <p className="text-sm opacity-75">Expiry Date: {new Date(alert.expiry_date).toLocaleDateString()}</p>
                       <p className="text-sm opacity-75">
                         Purchase Price: INR {alert.purchase_price} per unit
                       </p>

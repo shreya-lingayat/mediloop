@@ -2,7 +2,6 @@
 import { NavLink } from "react-router-dom";
 import {
   LayoutDashboard,
-  Users,
   UserPlus,
   Search,
   Pill,
@@ -16,23 +15,23 @@ import {
 
 export default function Sidebar() {
   const linkClass =
-    "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition";
+    "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition";
 
   const activeClass =
-    "bg-blue-50 text-blue-600 border border-blue-100";
+    "bg-emerald-500/20 text-emerald-100";
 
   const inactiveClass =
-    "text-gray-600 hover:bg-gray-100 hover:text-gray-900";
+    "text-emerald-50/80 hover:bg-emerald-500/15 hover:text-white";
 
   return (
-    <div className="w-64 min-h-screen bg-white border-r border-gray-200 p-5 flex flex-col">
+    <div className="w-64 min-h-screen bg-emerald-950 border-r border-emerald-900 p-5 flex flex-col shadow-xl">
       
       {/* Logo */}
       <div className="mb-8">
-        <h2 className="text-gray-800 text-xl font-semibold">
+        <h2 className="text-white text-xl font-semibold">
           MediLoop
         </h2>
-        <p className="text-gray-400 text-xs mt-1">
+        <p className="text-emerald-200/80 text-xs mt-1">
           Pharmacy System
         </p>
       </div>
@@ -52,7 +51,7 @@ export default function Sidebar() {
 
         {/* Patients */}
         <div>
-          <p className="text-gray-400 text-xs uppercase mb-2 tracking-wide">
+          <p className="text-emerald-200/70 text-xs uppercase mb-2 tracking-wide">
             Patients
           </p>
 
@@ -81,7 +80,7 @@ export default function Sidebar() {
 
         {/* Inventory */}
         <div>
-          <p className="text-gray-400 text-xs uppercase mb-2 tracking-wide">
+          <p className="text-emerald-200/70 text-xs uppercase mb-2 tracking-wide">
             Inventory
           </p>
 
@@ -130,7 +129,7 @@ export default function Sidebar() {
 
         {/* Operations */}
         <div>
-          <p className="text-gray-400 text-xs uppercase mb-2 tracking-wide">
+          <p className="text-emerald-200/70 text-xs uppercase mb-2 tracking-wide">
             Operations
           </p>
 
@@ -159,7 +158,7 @@ export default function Sidebar() {
 
         {/* Alerts */}
         <div>
-          <p className="text-gray-400 text-xs uppercase mb-2 tracking-wide">
+          <p className="text-emerald-200/70 text-xs uppercase mb-2 tracking-wide">
             Alerts
           </p>
 

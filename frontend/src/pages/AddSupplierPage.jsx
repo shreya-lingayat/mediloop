@@ -59,7 +59,7 @@ export default function AddSupplierPage() {
       <div className="max-w-2xl mx-auto">
         <h1 className="text-3xl font-bold mb-6">Add Supplier</h1>
 
-        <div className="bg-white rounded-lg shadow-md p-6">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
           {message && (
             <div className={`mb-4 p-4 rounded-lg ${
               message.includes("success") 
@@ -82,7 +82,7 @@ export default function AddSupplierPage() {
                 value={formData.supplier_name}
                 onChange={handleChange}
                 required
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                 placeholder="Enter supplier name"
               />
             </div>
@@ -99,7 +99,7 @@ export default function AddSupplierPage() {
                 onChange={handleChange}
                 required
                 pattern="[0-9]{10}"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                 placeholder="Enter 10-digit contact number"
               />
             </div>
@@ -115,7 +115,7 @@ export default function AddSupplierPage() {
                 value={formData.license_no}
                 onChange={handleChange}
                 required
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                 placeholder="Enter drug license number"
               />
             </div>

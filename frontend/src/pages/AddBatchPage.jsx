@@ -100,7 +100,7 @@ export default function AddBatchPage() {
       <div className="max-w-2xl mx-auto">
         <h1 className="text-3xl font-bold mb-6">Add Medicine Batch</h1>
 
-        <div className="bg-white rounded-lg shadow-md p-6">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
           {message && (
             <div className={`mb-4 p-4 rounded-lg ${
               message.includes("success") 
@@ -122,7 +122,7 @@ export default function AddBatchPage() {
                 value={formData.medicine_id}
                 onChange={handleChange}
                 required
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
               >
                 <option value="">Select medicine</option>
                 {medicines.map((medicine) => (
@@ -143,7 +143,7 @@ export default function AddBatchPage() {
                 value={formData.supplier_id}
                 onChange={handleChange}
                 required
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
               >
                 <option value="">Select supplier</option>
                 {suppliers.map((supplier) => (
@@ -166,7 +166,7 @@ export default function AddBatchPage() {
                 onChange={handleChange}
                 required
                 max={new Date().toISOString().split('T')[0]}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
               />
             </div>
 
@@ -182,7 +182,7 @@ export default function AddBatchPage() {
                 onChange={handleChange}
                 required
                 min="1"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                 placeholder="Enter quantity"
               />
             </div>
@@ -200,7 +200,7 @@ export default function AddBatchPage() {
                 required
                 min="0"
                 step="0.01"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                 placeholder="Enter purchase price per unit"
               />
             </div>
@@ -209,7 +209,7 @@ export default function AddBatchPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-orange-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+                className="flex-1 bg-emerald-600 text-white py-2 px-4 rounded-lg hover:bg-emerald-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
               >
                 {loading ? "Adding..." : "Add Batch"}
               </button>
@@ -224,9 +224,9 @@ export default function AddBatchPage() {
           </form>
         </div>
 
-        <div className="mt-6 bg-blue-50 rounded-lg p-4">
-          <h3 className="font-semibold text-blue-900 mb-2">Batch Information:</h3>
-          <ul className="text-sm text-blue-800 space-y-1">
+        <div className="mt-6 bg-emerald-50 rounded-xl p-4 border border-emerald-100 shadow-sm">
+          <h3 className="font-semibold text-emerald-900 mb-2">Batch Information:</h3>
+          <ul className="text-sm text-emerald-800 space-y-1">
             <li>Select the medicine and supplier from the dropdown lists</li>
             <li>Enter the manufacturing date (cannot be future dated)</li>
             <li>Enter the available quantity in this batch</li>
